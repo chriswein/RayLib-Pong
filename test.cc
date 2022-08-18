@@ -57,21 +57,38 @@ void render()
 
 void update()
 {
+    for (auto i : *game_elements){
+        i->update();
+    }
+    prnt("updated");
     if (IsKeyDown(KEY_UP))
     {
-        paddle2->coords.y -= 10;
+        paddle2->keyEvent(KEY_DOWN, 0);
     }
     if (IsKeyDown(KEY_DOWN))
     {
-        paddle2->coords.y += 10;
+        paddle2->keyEvent(KEY_DOWN, 1);
     }
     if (IsKeyDown(KEY_S))
     {
-        paddle1->coords.y += 10;
+        paddle1->keyEvent(KEY_DOWN, 1);
     }
     if (IsKeyDown(KEY_W))
     {
-        paddle1->coords.y -= 10;
+        paddle1->keyEvent(KEY_DOWN, 0);
+    }
+    // KEYUP 
+    if(IsKeyReleased(KEY_UP)){
+        paddle2->keyEvent(KEY_UP, 0);
+    }
+    if(IsKeyReleased(KEY_DOWN)){
+        paddle2->keyEvent(KEY_UP, 1);
+    }
+    if(IsKeyReleased(KEY_S)){
+        paddle1->keyEvent(KEY_UP, 0);
+    }
+    if(IsKeyReleased(KEY_W)){
+        paddle1->keyEvent(KEY_UP, 1);
     }
     if (IsKeyDown(KEY_F))
     {
@@ -108,12 +125,16 @@ void update()
 int main(void)
 {
     InitWindow(WIDTH, HEIGHT, "Pong");
-    SetTargetFPS(60);
+    double next = GetTime()+INTRAFRAMETIME;
+    SetTargetFPS(120);
     init();
 
     while ((GAME_RUNNING = !WindowShouldClose()))
     {
-        update();
+        if(GetTime() > next){
+            update();
+            next = GetTime()+INTRAFRAMETIME;
+        }
         render();
     }
 

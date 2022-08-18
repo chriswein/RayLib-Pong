@@ -8,6 +8,7 @@
 #define PADDLE2 2
 #define TOPWALL 3
 #define BOTTOMWALL 4
+#define INTRAFRAMETIME 0.012
 
 class drawable
 {
@@ -16,10 +17,20 @@ public:
     virtual void update();
 };
 
+typedef struct {
+	bool moving;
+	int direction;
+}MovementInfo;
+
 class boxcollision{
 	public: 
 	virtual Rectangle get();
 	virtual bool check(std::shared_ptr<boxcollision> partner);
 	virtual void collision(std::shared_ptr<boxcollision> partner);
 	virtual int id();
+	virtual MovementInfo moveStatus();
+};
+
+class keylistener{
+	virtual void keyEvent(int event, int key);
 };

@@ -3,11 +3,13 @@
 #include <memory>
 #include <iostream>
 
-class paddle : public drawable, public boxcollision
+class paddle : public drawable, public boxcollision, public keylistener
 {
 public:
 	int id_;
 	Rectangle coords;
+	bool moving = false;
+	int direction = 0;
 	paddle(int id, Rectangle vec)
 	{
 		this->id_ = id;
@@ -38,6 +40,19 @@ public:
 	virtual int id()
 	{
 		return this->id_;
+	}
+	virtual void keyEvent(int event, int key)
+	{
+		if(event==KEY_DOWN){
+			this->moving = true;
+			this->direction = key;
+			this->coords.y += (key==0)?-10:10;
+		}else{
+			this->moving = false;
+		}
+	}
+	virtual MovementInfo moveStatus(){
+		return {this->moving, this->direction};
 	}
 };
 
@@ -82,7 +97,7 @@ public:
 	}
 	virtual void draw()
 	{
-		update();
+		//update();
 		Vector2 middle = this->middle();
 		DrawCircle(middle.x, middle.y, this->pos.width * 2.0f, BLACK);
 	}
@@ -122,14 +137,24 @@ public:
 		// This was a paddle
 		if (0 < partner->id() && partner->id() < 3)
 			this->lastCollisionPaddle = partner->id();
-		
+
+		MovementInfo m = partner->moveStatus();
+
 		switch (partner->id())
 		{
 		case PADDLE1:
 			this->impulse.x *= -1;
+			if(m.moving){
+				std::cout << "Hit while moving" << std::endl;
+				this->impulse.y = (m.direction == 0)? -1*abs(this->impulse.y): abs(this->impulse.y);
+			}			
 			break;
 		case PADDLE2:
 			this->impulse.x *= -1;
+			if(m.moving){
+				std::cout << "Hit while moving" << std::endl;
+				this->impulse.y = (m.direction == 0)? -1*abs(this->impulse.y): abs(this->impulse.y);
+			}	
 			break;
 		case TOPWALL:
 			this->impulse.y *= -1;
@@ -147,4 +172,8 @@ public:
 	{
 		return 9999;
 	}
+	virtual MovementInfo moveStatus(){
+		return {true, -1};
+	}
+	
 };
