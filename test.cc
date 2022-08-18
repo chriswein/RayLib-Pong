@@ -2,28 +2,56 @@
 #include <memory>
 #include <iostream>
 
-#include "raylib.h"
+#include "./include/raylib.h"
 
 #include "game.h"
 #include "game_elements.cc"
 
-std::shared_ptr<paddle> paddle1(new paddle(0, {0, 0, 20, 400}));
-std::shared_ptr<paddle> paddle2(new paddle(1, {1280 - 20, 0, 20, 400}));
-std::shared_ptr<ball> ball1(new ball({1280/2, 720/2, 10,10}, {3,0}));
+#define prnt(x) std::cout << x << std::endl;
+
+std::shared_ptr<paddle> paddle1(nullptr);
+std::shared_ptr<paddle> paddle2(nullptr);
+std::shared_ptr<Wall> top(nullptr);
+std::shared_ptr<Wall> bottom(nullptr);
+std::shared_ptr<ball> ball1(nullptr);
 bool GAME_RUNNING = true;
-std::vector<std::shared_ptr<drawable>> game_elements;
-std::vector<std::shared_ptr<boxcollision>> collision_elements;
+std::vector<std::shared_ptr<drawable>> *game_elements;
+std::vector<std::shared_ptr<boxcollision>> *collision_elements;
+
+void init()
+{
+    prnt("initialized");
+
+    paddle1 = std::make_shared<paddle>(paddle(PADDLE1, {0, 200, 20, 200}));
+    paddle2 = std::make_shared<paddle>(paddle(PADDLE2, {WIDTH - 20, 0, 20, 200}));
+    top = std::make_shared<Wall>(Wall(TOPWALL,{0, -10, WIDTH, 10}));
+    bottom = std::make_shared<Wall>(Wall(BOTTOMWALL,{0, HEIGHT , WIDTH, 10}));
+    ball1 = std::make_shared<ball>(ball({WIDTH / 2, 100, 10, 10}, {12, -1}));
+
+    game_elements = new std::vector<std::shared_ptr<drawable>>();
+    game_elements->push_back(std::dynamic_pointer_cast<drawable>(paddle1));
+    game_elements->push_back(std::dynamic_pointer_cast<drawable>(paddle2));
+    game_elements->push_back(std::dynamic_pointer_cast<drawable>(top));
+    game_elements->push_back(std::dynamic_pointer_cast<drawable>(bottom));
+    game_elements->push_back(std::dynamic_pointer_cast<drawable>(ball1));
+
+    collision_elements = new std::vector<std::shared_ptr<boxcollision>>();
+    collision_elements->push_back(std::dynamic_pointer_cast<boxcollision>(paddle1));
+    collision_elements->push_back(std::dynamic_pointer_cast<boxcollision>(paddle2));
+    collision_elements->push_back(std::dynamic_pointer_cast<boxcollision>(top));
+    collision_elements->push_back(std::dynamic_pointer_cast<boxcollision>(bottom));
+    collision_elements->push_back(std::dynamic_pointer_cast<boxcollision>(ball1));
+}
 
 void render()
 {
     BeginDrawing();
     ClearBackground(RAYWHITE);
-    for (auto i : game_elements)
+    for (auto i : *game_elements)
     {
         i->draw();
     }
 
-    DrawText("Congrats! You created your first window!", 190, 200, 20, LIGHTGRAY);
     EndDrawing();
 }
 
@@ -45,39 +73,41 @@ void update()
     {
         paddle1->coords.y -= 10;
     }
-    if(IsKeyDown(KEY_F)){
+    if (IsKeyDown(KEY_F))
+    {
         ToggleFullscreen();
+        SetMouseCursor(MOUSE_CURSOR_CROSSHAIR);
     }
 
-    auto i = collision_elements.begin();
-    while (i < collision_elements.end())
+    auto i = collision_elements->begin();
+    while (i < collision_elements->end())
     {
-        auto j = i+1;
-        while(j < collision_elements.end()){
-            if((*i)->check( (*j) )){
+        auto j = i + 1;
+        while (j < collision_elements->end())
+        {
+            if ((*i)->check((*j)))
+            {
                 (*j)->collision((*i));
             }
             j++;
         }
         i++;
     }
-    
-}
 
-void init()
-{
-    game_elements.push_back(std::dynamic_pointer_cast<drawable>(paddle1));
-    game_elements.push_back(std::dynamic_pointer_cast<drawable>(paddle2));
-    game_elements.push_back(std::dynamic_pointer_cast<drawable>(ball1));
+    // Is the ball still in the game?
+    if (!ball1->living)
+    {
+        prnt("Game over");
+        prnt("Winner was:");
+        prnt(ball1->lastCollisionPaddle);
 
-    collision_elements.push_back(std::dynamic_pointer_cast<boxcollision>(paddle1));
-    collision_elements.push_back(std::dynamic_pointer_cast<boxcollision>(paddle2));
-    collision_elements.push_back(std::dynamic_pointer_cast<boxcollision>(ball1));
+        init();
+    }
 }
 
 int main(void)
 {
-    InitWindow(1280, 720, "Mein kleines Spiel");
+    InitWindow(WIDTH, HEIGHT, "Pong");
     SetTargetFPS(60);
     init();
 
@@ -87,7 +117,7 @@ int main(void)
         render();
     }
 
-    CloseWindow();   
+    CloseWindow();
 
     return 0;
 }

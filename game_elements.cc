@@ -1,4 +1,4 @@
-#include "raylib.h"
+#include "./include/raylib.h"
 #include "game.h"
 #include <memory>
 #include <iostream>
@@ -6,15 +6,16 @@
 class paddle : public drawable, public boxcollision
 {
 public:
-	int id;
+	int id_;
 	Rectangle coords;
 	paddle(int id, Rectangle vec)
 	{
-		this->id = id;
+		this->id_ = id;
 		this->coords = vec;
 	}
-	~paddle(){
-			std::cout << "deconstructed paddle: " << this->id << std::endl;
+	~paddle()
+	{
+		std::cout << "deconstructed paddle: " << this->id_ << std::endl;
 	}
 	virtual void draw()
 	{
@@ -31,16 +32,49 @@ public:
 	{
 		return this->coords;
 	}
-	virtual void collision(std::shared_ptr<boxcollision> partner){
-	 	//std::cout << "rect collision" << std::endl;
+	virtual void collision(std::shared_ptr<boxcollision> partner)
+	{
 	}
+	virtual int id()
+	{
+		return this->id_;
+	}
+};
+
+class Wall : public paddle
+{
+public:
+	Wall(Rectangle r) : paddle(123, r)
+	{
+	}
+	Wall(int id, Rectangle r) : paddle(id, r)
+	{
+	}
+	virtual void draw() {}
 };
 
 class ball : public drawable, public boxcollision
 {
+private:
+	bool checkInBounds()
+	{
+		if (this->pos.x + this->pos.width * 2 < 0)
+			return false;
+		if (this->pos.x > WIDTH)
+			return false;
+		if (this->pos.y + this->pos.height * 2 < 0)
+			return false;
+		if (this->pos.y > HEIGHT)
+			return false;
+
+		return true;
+	}
+
 public:
 	Rectangle pos;
 	Vector2 impulse;
+	int lastCollisionPaddle = 0;
+	bool living = true;
 	ball(Rectangle pos, Vector2 impulse)
 	{
 		this->pos = pos;
@@ -49,30 +83,68 @@ public:
 	virtual void draw()
 	{
 		update();
-		DrawCircle(this->pos.x + this->pos.width, this->pos.y + this->pos.height, 20.0f, BLACK);
+		Vector2 middle = this->middle();
+		DrawCircle(middle.x, middle.y, this->pos.width * 2.0f, BLACK);
 	}
-	~ball(){
-			std::cout << "decontructed ball" << std::endl;
+	~ball()
+	{
+		std::cout << "decontructed ball" << std::endl;
+	}
+	Vector2 middle()
+	{
+		Vector2 v;
+		v.x = this->pos.x + this->pos.width;
+		v.y = this->pos.y + this->pos.height;
+		return v;
 	}
 	virtual void update()
 	{
 		this->pos.x += this->impulse.x;
 		this->pos.y += this->impulse.y;
+		if (!this->checkInBounds())
+			this->living = false;
 	}
+
 	virtual bool check(std::shared_ptr<boxcollision> partner)
 	{
 		auto rect = partner->get();
-		Vector2 v = {this->pos.x + this->pos.width, this->pos.y + this->pos.height};
-		return CheckCollisionCircleRec(v, 20.0f, rect);
+		Vector2 v = this->middle();
+		return CheckCollisionCircleRec(v, 1.0f + this->pos.width, rect);
 	}
 	virtual Rectangle get()
 	{
-		Rectangle r{this->pos.x - this->pos.width, this->pos.y - this->pos.height, this->pos.width*2, this->pos.height*2};
-		return this->pos;
+		Rectangle r{this->pos.x, this->pos.y, this->pos.width * 2, this->pos.height * 2};
+		return r;
 	}
-	virtual void collision(std::shared_ptr<boxcollision> partner){
-	 	std::cout << "ball collision" << std::endl;
-		this->impulse.x *= -1;	
+	virtual void collision(std::shared_ptr<boxcollision> partner)
+	{
+
+		// This was a paddle
+		if (0 < partner->id() && partner->id() < 3)
+			this->lastCollisionPaddle = partner->id();
+		
+		switch (partner->id())
+		{
+		case PADDLE1:
+			this->impulse.x *= -1;
+			break;
+		case PADDLE2:
+			this->impulse.x *= -1;
+			break;
+		case TOPWALL:
+			this->impulse.y *= -1;
+			break;
+		case BOTTOMWALL:
+			this->impulse.y *= -1;
+			break;
+		default:
+			break;
+		}
+
 		this->update();
+	}
+	virtual int id()
+	{
+		return 9999;
 	}
 };
