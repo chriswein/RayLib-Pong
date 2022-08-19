@@ -2,7 +2,7 @@
 #include "game.h"
 #include <memory>
 #include <iostream>
-
+#pragma once
 class paddle : public drawable, public boxcollision, public keylistener
 {
 public:
@@ -43,15 +43,19 @@ public:
 	}
 	virtual void keyEvent(int event, int key)
 	{
-		if(event==KEY_DOWN){
+		if (event == KEY_DOWN)
+		{
 			this->moving = true;
 			this->direction = key;
-			this->coords.y += (key==0)?-10:10;
-		}else{
+			this->coords.y += (key == 0) ? -10 : 10;
+		}
+		else
+		{
 			this->moving = false;
 		}
 	}
-	virtual MovementInfo moveStatus(){
+	virtual MovementInfo moveStatus()
+	{
 		return {this->moving, this->direction};
 	}
 };
@@ -97,7 +101,7 @@ public:
 	}
 	virtual void draw()
 	{
-		//update();
+		// update();
 		Vector2 middle = this->middle();
 		DrawCircle(middle.x, middle.y, this->pos.width * 2.0f, BLACK);
 	}
@@ -144,17 +148,17 @@ public:
 		{
 		case PADDLE1:
 			this->impulse.x *= -1;
-			if(m.moving){
-				std::cout << "Hit while moving" << std::endl;
-				this->impulse.y = (m.direction == 0)? -1*abs(this->impulse.y): abs(this->impulse.y);
-			}			
+			if (m.moving)
+			{
+				this->impulse.y = (m.direction == 0) ? -1 * abs(this->impulse.y) : abs(this->impulse.y);
+			}
 			break;
 		case PADDLE2:
 			this->impulse.x *= -1;
-			if(m.moving){
-				std::cout << "Hit while moving" << std::endl;
-				this->impulse.y = (m.direction == 0)? -1*abs(this->impulse.y): abs(this->impulse.y);
-			}	
+			if (m.moving)
+			{
+				this->impulse.y = (m.direction == 0) ? -1 * abs(this->impulse.y) : abs(this->impulse.y);
+			}
 			break;
 		case TOPWALL:
 			this->impulse.y *= -1;
@@ -172,8 +176,8 @@ public:
 	{
 		return 9999;
 	}
-	virtual MovementInfo moveStatus(){
+	virtual MovementInfo moveStatus()
+	{
 		return {true, -1};
 	}
-	
 };
