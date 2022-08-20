@@ -4,28 +4,38 @@
 
 #include "./include/raylib.h"
 
-#include "game.h"
+#include "engine.h"
 #include "game_elements.cc"
 #include "level.cc"
+#include "game.cc"
 
 #define prnt(x) std::cout << x << std::endl;
 
 bool GAME_RUNNING = true;
+// std::shared_ptr<Level> current_level;
+Level *current_level;
 
-void changeLevelRequest(void * level){
-    std::cout << "Change of Level requested" << std:: endl;
-    if (level == nullptr) {
-        std::cout << "no new level provided" << std:: endl;
-        CloseWindow();
-        return;
-    }
-    Level* l = (Level*) level;
+void changeLevelRequest(Level *level)
+{
+    std::cout << "Change of Level requested" << std::endl;
+    // Clean up previous level
+    free((void *)current_level);
+    // Hook up the new one and init
+    current_level = level;
+    current_level->init();
 }
-
-unique_ptr<Level> current_level(new Game(&changeLevelRequest));
+std::function<void(Level *)> cb = &changeLevelRequest;
 
 void init()
 {
+
+// current_level = make_shared<Game>(Game(cb));
+#ifndef NOTITLE
+    current_level = new Title(cb); // new Game(cb);
+#endif
+#ifdef NOTITLE
+    current_level = new Game(cb);
+#endif
     prnt("initialized");
     current_level->init();
 }
@@ -34,7 +44,7 @@ void render()
 {
     BeginDrawing();
     ClearBackground(RAYWHITE);
-        current_level->draw();
+    current_level->draw();
     EndDrawing();
 }
 
