@@ -8,3 +8,9 @@ test.exe
 .vscode/settings.json
 .vscode/tasks.json
 include/raylib.h
+hit.wav
+out.wav
+wgcoin.wav
+.vscode/c_cpp_properties.json
+.vscode/launch.json
+.vscode/settings.json

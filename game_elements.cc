@@ -2,6 +2,9 @@
 #include "engine.h"
 #include <memory>
 #include <iostream>
+#include <limits.h>
+#include "audio.cc"
+#include <cstdlib>
 #pragma once
 class paddle : public drawable, public boxcollision, public keylistener
 {
@@ -94,10 +97,14 @@ public:
 	Vector2 impulse;
 	int lastCollisionPaddle = 0;
 	bool living = true;
-	ball(Rectangle pos, Vector2 impulse)
+	// Sound fxWav;
+	shared_ptr<AudioManager> am;
+	ball(Rectangle pos, Vector2 impulse, shared_ptr<AudioManager> am)
 	{
 		this->pos = pos;
 		this->impulse = impulse;
+		// fxWav = LoadSound("hit.wav");
+		this->am = am;
 	}
 	virtual void draw()
 	{
@@ -121,7 +128,10 @@ public:
 		this->pos.x += this->impulse.x;
 		this->pos.y += this->impulse.y;
 		if (!this->checkInBounds())
+		{
 			this->living = false;
+			this->am->play("out.wav");
+		}
 	}
 
 	virtual bool check(std::shared_ptr<boxcollision> partner)
@@ -143,21 +153,26 @@ public:
 			this->lastCollisionPaddle = partner->id();
 
 		MovementInfo m = partner->moveStatus();
-
+		float rand_ = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+		rand_ += 1;
 		switch (partner->id())
 		{
 		case PADDLE1:
-			this->impulse.x *= -1;
+			this->impulse.x *= -1.02;
+			// PlaySound(this->am);
+			this->am->play("hit.wav");
 			if (m.moving)
 			{
-				this->impulse.y = (m.direction == 0) ? -1 * abs(this->impulse.y) : abs(this->impulse.y);
+				this->impulse.y = (m.direction == 0) ? -1 * abs(this->impulse.y * rand_) : abs(this->impulse.y * rand_);
 			}
 			break;
 		case PADDLE2:
-			this->impulse.x *= -1;
+			this->impulse.x *= -1.02;
+			// PlaySound(this->fxWav);
+			this->am->play("hit.wav");
 			if (m.moving)
 			{
-				this->impulse.y = (m.direction == 0) ? -1 * abs(this->impulse.y) : abs(this->impulse.y);
+				this->impulse.y = (m.direction == 0) ? -1 * abs(this->impulse.y * rand_) : abs(this->impulse.y * rand_);
 			}
 			break;
 		case TOPWALL:

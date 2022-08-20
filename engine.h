@@ -20,6 +20,7 @@ public:
 typedef struct {
 	bool moving;
 	int direction;
+	float speed;
 }MovementInfo;
 
 class boxcollision{

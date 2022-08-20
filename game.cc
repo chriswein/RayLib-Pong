@@ -11,12 +11,15 @@ class Game : public Level
 	std::shared_ptr<ball> ball1;
 	bool paused = false;
 	std::unique_ptr<Pause> p;
+	shared_ptr<AudioManager> am;
+
 
 public:
-	Game(std::function<void(Level *)> callback) : Level(callback)
+	Game(std::function<void(Level *)> callback, shared_ptr<AudioManager> am) : Level(callback)
 	{
 		this->id = GAME;
 		this->p = make_unique<Pause>(Pause(callback));
+		this->am = am;
 	}
 	void init()
 	{
@@ -30,7 +33,7 @@ public:
 		this->paddle2 = std::make_shared<paddle>(paddle(PADDLE2, {WIDTH - 20, 0, 20, 200}));
 		this->top = std::make_shared<Wall>(Wall(TOPWALL, {0, -10, WIDTH, 10}));
 		this->bottom = std::make_shared<Wall>(Wall(BOTTOMWALL, {0, HEIGHT, WIDTH, 10}));
-		this->ball1 = std::make_shared<ball>(ball({WIDTH / 2, 100, 10, 10}, {18, -1}));
+		this->ball1 = std::make_shared<ball>(ball({WIDTH / 2, 100, 10, 10}, {18, -1}, this->am));
 		std::cout << "init game elements done" << std::endl;
 		game_elements->push_back(std::dynamic_pointer_cast<drawable>(paddle1));
 		game_elements->push_back(std::dynamic_pointer_cast<drawable>(paddle2));
@@ -145,22 +148,25 @@ class Title : public Level
 {
 public:
 	double start;
-	Title(std::function<void(Level *)> callback) : Level(callback)
+	std::shared_ptr<AudioManager> am;
+	Title(std::function<void(Level *)> callback, std::shared_ptr<AudioManager> am) : Level(callback)
 	{
 		this->id = TITLE;
+		this->am = am;
 	}
 	void update()
 	{
 		if (GetTime() > start + 5)
 		{
-			Game *g = new Game(this->callback);
+			this->am->play("wgcoin.wav");
+			Game *g = new Game(this->callback, this->am);
 			this->callback(g);
 			//((void(*)(void*))this->callback)(nullptr);//&g);
 		}
 	}
 	void draw()
 	{
-		DrawText("Weingame", WIDTH / 2, HEIGHT / 2, 24, BLACK);
+		DrawText("Weingame", (WIDTH / 2)-50, (HEIGHT / 2)-25, 24, BLACK);
 	}
 	void init()
 	{
