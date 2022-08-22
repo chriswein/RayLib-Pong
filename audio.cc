@@ -1,29 +1,26 @@
-#include <string>
-#include "./include/raylib.h"
-#include <map>
-#include <iostream>
-#pragma once
-using namespace std;
+#include "audio.h"
 
-class AudioManager {
-	map<string,Sound> sounds;
-	public:
-	AudioManager(){
+AudioManager::AudioManager()
+{
+}
+void AudioManager::add(const char *name)
+{
+	Sound s = LoadSound(name);
+	this->sounds[name] = s;
+}
+AudioManager::~AudioManager()
+{
+	cout << "Unloading Sounds" << endl;
+	for (auto i : this->sounds)
+	{
+		UnloadSound(i.second);
+		cout << i.first << endl;
 	}
-	void add(const char* name){
-		Sound s = LoadSound(name);
-		this->sounds[name] = s;
+}
+void AudioManager::play(string name)
+{
+	if (sounds.count(name) > 0)
+	{
+		PlaySound(sounds[name]);
 	}
-	~AudioManager(){
-		cout << "Unloading Sounds" << endl;
-		for(auto i: this->sounds){
-			UnloadSound(i.second);
-			cout << i.first << endl;
-		}
-	}
-	void play(string name){
-		if (sounds.count(name)>0){
-			PlaySound(sounds[name]);
-		}
-	}
-};
+}

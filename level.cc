@@ -1,54 +1,22 @@
-#include "raylib.h"
-#include "engine.h"
-#include "game_elements.cc"
-#include <memory>
-#include <vector>
-#include <functional>
-using namespace std;
-#pragma once
-enum LEVELID
-{
-	LEVEL,
-	GAME,
-	TITLE
-};
+#include "level.h"
 
-class Level
+Level::Level(std::function<void(Level *)> callback)
 {
-	/**
-	 *  Loads all game elements
-	 **/
-public:
-	function<void(Level *)> callback;
-	// void* callback;
-	int id = LEVEL;
-	Level(std::function<void(Level *)> callback)
-	{
-		this->callback = callback;
-	}
-	virtual void init() { cout << "Level Init called" << endl; };
-	virtual void update(){};
-	virtual void draw(){};
-};
+	this->callback = callback;
+}
 
-class Pause : public Level
+Pause::Pause(std::function<void(Level *)> callback) : Level(callback)
 {
-public:
-	double start;
-	Pause(std::function<void(Level *)> callback) : Level(callback)
-	{
-		this->id = TITLE;
-	}
-	void update()
-	{
-	}
-	void draw()
-	{
-		DrawText("Pause", WIDTH / 2, HEIGHT / 2, 24, BLACK);
-	}
-	void init()
-	{
-		this->start = GetTime();
-	}
-};
-
+	this->id = TITLE;
+}
+void Pause::update()
+{
+}
+void Pause::draw()
+{
+	DrawText("Pause", (WIDTH / 2) - 40, (HEIGHT / 2) - 30, 24, BLACK);
+}
+void Pause::init()
+{
+	this->start = GetTime();
+}

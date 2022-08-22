@@ -1,6 +1,8 @@
 #pragma once
 #include "./include/raylib.h"
 #include <memory>
+#include <string>
+#include <map>
 
 #define WIDTH 1280
 #define HEIGHT 720
@@ -34,4 +36,12 @@ class boxcollision{
 
 class keylistener{
 	virtual void keyEvent(int event, int key);
+};
+
+class StateManager {
+	std::map<std::string, int> memory;
+	public:
+	void increaseValue(std::string value);
+	int getValue(std::string key);
+	void setValue(std::string key, int value);
 };

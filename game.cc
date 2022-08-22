@@ -1,175 +1,166 @@
-#include "level.cc"
+#include "game.h"
 
-class Game : public Level
+void Game::drawPoints()
 {
-	shared_ptr<vector<shared_ptr<drawable>>> game_elements;
-	shared_ptr<vector<shared_ptr<boxcollision>>> collision_elements;
-	std::shared_ptr<paddle> paddle1;
-	std::shared_ptr<paddle> paddle2;
-	std::shared_ptr<Wall> top;
-	std::shared_ptr<Wall> bottom;
-	std::shared_ptr<ball> ball1;
-	bool paused = false;
-	std::unique_ptr<Pause> p;
-	shared_ptr<AudioManager> am;
+	string label = std::to_string(this->state->getValue("P1")) + ":" + std::to_string(this->state->getValue("P2"));
+	DrawText(label.c_str(), (WIDTH / 2) - 50, 25, 36, DARKBROWN);
+}
 
+Game::Game(std::function<void(Level *)> callback, shared_ptr<AudioManager> am, shared_ptr<StateManager> state) : Level(callback)
+{
+	this->id = GAME;
+	this->p = make_unique<Pause>(Pause(callback));
+	this->am = am;
+	this->state = state;
+}
+void Game::init()
+{
+	this->game_elements =
+		make_shared<vector<shared_ptr<drawable>>>(vector<shared_ptr<drawable>>());
 
-public:
-	Game(std::function<void(Level *)> callback, shared_ptr<AudioManager> am) : Level(callback)
+	this->collision_elements =
+		make_shared<vector<shared_ptr<boxcollision>>>(vector<shared_ptr<boxcollision>>());
+
+	this->paddle1 = std::make_shared<paddle>(paddle(PADDLE1, {0, 260, 20, 200}));
+	this->paddle2 = std::make_shared<paddle>(paddle(PADDLE2, {WIDTH - 20, 260, 20, 200}));
+	this->top = std::make_shared<Wall>(Wall(TOPWALL, {0, -10, WIDTH, 10}));
+	this->bottom = std::make_shared<Wall>(Wall(BOTTOMWALL, {0, HEIGHT, WIDTH, 10}));
+	this->ball1 = std::make_shared<ball>(ball({WIDTH / 2, 360, 10, 10}, {18, 1}, this->am, this->state));
+	std::cout << "init game elements done" << std::endl;
+	game_elements->push_back(std::dynamic_pointer_cast<drawable>(paddle1));
+	game_elements->push_back(std::dynamic_pointer_cast<drawable>(paddle2));
+	game_elements->push_back(std::dynamic_pointer_cast<drawable>(top));
+	game_elements->push_back(std::dynamic_pointer_cast<drawable>(bottom));
+	game_elements->push_back(std::dynamic_pointer_cast<drawable>(ball1));
+
+	collision_elements->push_back(std::dynamic_pointer_cast<boxcollision>(paddle1));
+	collision_elements->push_back(std::dynamic_pointer_cast<boxcollision>(paddle2));
+	collision_elements->push_back(std::dynamic_pointer_cast<boxcollision>(top));
+	collision_elements->push_back(std::dynamic_pointer_cast<boxcollision>(bottom));
+	collision_elements->push_back(std::dynamic_pointer_cast<boxcollision>(ball1));
+}
+
+void Game::update()
+{
+	if (!this->paused)
 	{
-		this->id = GAME;
-		this->p = make_unique<Pause>(Pause(callback));
-		this->am = am;
-	}
-	void init()
-	{
-		this->game_elements =
-			make_shared<vector<shared_ptr<drawable>>>(vector<shared_ptr<drawable>>());
-
-		this->collision_elements =
-			make_shared<vector<shared_ptr<boxcollision>>>(vector<shared_ptr<boxcollision>>());
-
-		this->paddle1 = std::make_shared<paddle>(paddle(PADDLE1, {0, 200, 20, 200}));
-		this->paddle2 = std::make_shared<paddle>(paddle(PADDLE2, {WIDTH - 20, 0, 20, 200}));
-		this->top = std::make_shared<Wall>(Wall(TOPWALL, {0, -10, WIDTH, 10}));
-		this->bottom = std::make_shared<Wall>(Wall(BOTTOMWALL, {0, HEIGHT, WIDTH, 10}));
-		this->ball1 = std::make_shared<ball>(ball({WIDTH / 2, 100, 10, 10}, {18, -1}, this->am));
-		std::cout << "init game elements done" << std::endl;
-		game_elements->push_back(std::dynamic_pointer_cast<drawable>(paddle1));
-		game_elements->push_back(std::dynamic_pointer_cast<drawable>(paddle2));
-		game_elements->push_back(std::dynamic_pointer_cast<drawable>(top));
-		game_elements->push_back(std::dynamic_pointer_cast<drawable>(bottom));
-		game_elements->push_back(std::dynamic_pointer_cast<drawable>(ball1));
-
-		collision_elements->push_back(std::dynamic_pointer_cast<boxcollision>(paddle1));
-		collision_elements->push_back(std::dynamic_pointer_cast<boxcollision>(paddle2));
-		collision_elements->push_back(std::dynamic_pointer_cast<boxcollision>(top));
-		collision_elements->push_back(std::dynamic_pointer_cast<boxcollision>(bottom));
-		collision_elements->push_back(std::dynamic_pointer_cast<boxcollision>(ball1));
-	}
-	void update()
-	{
-		if (!this->paused)
+		drawPoints();
+		for (auto i : *(this->game_elements))
 		{
-			for (auto i : *(this->game_elements))
-			{
-				i->update();
-			}
-if (IsKeyDown(KEY_UP))
-			{
-				this->paddle2->keyEvent(KEY_DOWN, 0);
-			}
-			if (IsKeyDown(KEY_DOWN))
-			{
+			i->update();
+		}
+		if (IsKeyDown(KEY_UP))
+		{
+			this->paddle2->keyEvent(KEY_DOWN, 0);
+		}
+		if (IsKeyDown(KEY_DOWN))
+		{
 
-				this->paddle2->keyEvent(KEY_DOWN, 1);
-			}
-			if (IsKeyDown(KEY_S))
+			this->paddle2->keyEvent(KEY_DOWN, 1);
+		}
+		if (IsKeyDown(KEY_S))
+		{
+			this->paddle1->keyEvent(KEY_DOWN, 1);
+		}
+		if (IsKeyDown(KEY_W))
+		{
+			this->paddle1->keyEvent(KEY_DOWN, 0);
+		}
+		// KEYUP
+		if (IsKeyReleased(KEY_UP))
+		{
+			this->paddle2->keyEvent(KEY_UP, 0);
+		}
+		if (IsKeyReleased(KEY_DOWN))
+		{
+			this->paddle2->keyEvent(KEY_UP, 1);
+		}
+		if (IsKeyReleased(KEY_S))
+		{
+			this->paddle1->keyEvent(KEY_UP, 0);
+		}
+		if (IsKeyReleased(KEY_W))
+		{
+			this->paddle1->keyEvent(KEY_UP, 1);
+		}
+		if (IsKeyDown(KEY_F))
+		{
+			ToggleFullscreen();
+		}
+		if (IsKeyPressed(KEY_ESCAPE))
+		{
+			this->paused = !this->paused;
+		}
+		auto i = this->collision_elements->begin();
+		while (i < this->collision_elements->end())
+		{
+			auto j = i + 1;
+			while (j < this->collision_elements->end())
 			{
-				this->paddle1->keyEvent(KEY_DOWN, 1);
-			}
-			if (IsKeyDown(KEY_W))
-			{
-				this->paddle1->keyEvent(KEY_DOWN, 0);
-			}
-			// KEYUP
-			if (IsKeyReleased(KEY_UP))
-			{
-				this->paddle2->keyEvent(KEY_UP, 0);
-			}
-			if (IsKeyReleased(KEY_DOWN))
-			{
-				this->paddle2->keyEvent(KEY_UP, 1);
-			}
-			if (IsKeyReleased(KEY_S))
-			{
-				this->paddle1->keyEvent(KEY_UP, 0);
-			}
-			if (IsKeyReleased(KEY_W))
-			{
-				this->paddle1->keyEvent(KEY_UP, 1);
-			}
-			if (IsKeyDown(KEY_F))
-			{
-				ToggleFullscreen();
-			}
-			if (IsKeyPressed(KEY_PAUSE))
-			{
-				this->paused = !this->paused;
-			}
-			auto i = this->collision_elements->begin();
-			while (i < this->collision_elements->end())
-			{
-				auto j = i + 1;
-				while (j < this->collision_elements->end())
+				if ((*i)->check((*j)))
 				{
-					if ((*i)->check((*j)))
-					{
-						(*j)->collision((*i));
-					}
-					j++;
+					(*j)->collision((*i));
 				}
-				i++;
+				j++;
 			}
-			// Is the ball still in the game?
-			if (!this->ball1->living)
-			{
-				std::cout << "Game over" << std::endl;
-				std::cout << "Winner was:" << std::endl;
-				std::cout << this->ball1->lastCollisionPaddle << std::endl;
-
-				this->init();
-			}
+			i++;
 		}
-		else
+		// Is the ball still in the game?
+		if (!this->ball1->living)
 		{
-			this->p->update();
-			if (IsKeyPressed(KEY_PAUSE))
-			{
-				this->paused = !this->paused;
-			}
+			std::cout << "Game over" << std::endl;
+			std::cout << "Winner was:" << std::endl;
+			std::cout << this->ball1->lastCollisionPaddle << std::endl;
+
+			this->init();
 		}
 	}
-	void draw()
+	else
 	{
-		if (!this->paused)
+		this->p->update();
+		if (IsKeyPressed(KEY_ESCAPE))
 		{
-			for (auto i : *(this->game_elements))
-			{
-				i->draw();
-			}
-		}else{
-			this->p->draw();
+			this->paused = !this->paused;
 		}
 	}
-};
-
-class Title : public Level
+}
+void Game::draw()
 {
-public:
-	double start;
-	std::shared_ptr<AudioManager> am;
-	Title(std::function<void(Level *)> callback, std::shared_ptr<AudioManager> am) : Level(callback)
+	if (!this->paused)
 	{
-		this->id = TITLE;
-		this->am = am;
-	}
-	void update()
-	{
-		if (GetTime() > start + 5)
+		for (auto i : *(this->game_elements))
 		{
-			this->am->play("wgcoin.wav");
-			Game *g = new Game(this->callback, this->am);
-			this->callback(g);
-			//((void(*)(void*))this->callback)(nullptr);//&g);
+			i->draw();
 		}
 	}
-	void draw()
+	else
 	{
-		DrawText("Weingame", (WIDTH / 2)-50, (HEIGHT / 2)-25, 24, BLACK);
+		this->p->draw();
 	}
-	void init()
+}
+
+Title::Title(std::function<void(Level *)> callback, std::shared_ptr<AudioManager> am, shared_ptr<StateManager> state) : Level(callback)
+{
+	this->id = TITLE;
+	this->am = am;
+	this->state = state;
+}
+
+void Title::update()
+{
+	if (GetTime() > start + 5)
 	{
-		this->start = GetTime();
+		this->am->play("wgcoin.wav");
+		Game *g = new Game(this->callback, this->am, this->state);
+		this->callback(g);
+		//((void(*)(void*))this->callback)(nullptr);//&g);
 	}
-};
+}
+void Title::draw()
+{
+	DrawText("Weingame", (WIDTH / 2) - 50, (HEIGHT / 2) - 25, 24, BLACK);
+}
+void Title::init()
+{
+	this->start = GetTime();
+}
