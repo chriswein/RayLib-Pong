@@ -1,5 +1,4 @@
 /build
-/lib
 ./run.ps1
 main.exe
 test.exe
@@ -7,10 +6,6 @@ test.exe
 .vscode/launch.json
 .vscode/settings.json
 .vscode/tasks.json
-include/raylib.h
-hit.wav
-out.wav
-wgcoin.wav
 .vscode/c_cpp_properties.json
 .vscode/launch.json
 .vscode/settings.json
