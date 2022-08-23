@@ -12,6 +12,10 @@
 #define BOTTOMWALL 4
 #define INTRAFRAMETIME 0.012
 
+/**
+ * @brief Main class enabling the game loop to draw and update an element
+ * 
+ */
 class drawable
 {
 public:
@@ -25,6 +29,10 @@ typedef struct {
 	float speed;
 }MovementInfo;
 
+/**
+ * @brief Game elements need to implement this if they need collision detection
+ * 
+ */
 class boxcollision{
 	public: 
 	virtual Rectangle get();
@@ -38,6 +46,10 @@ class keylistener{
 	virtual void keyEvent(int event, int key);
 };
 
+/**
+ * @brief Used to keep track of the game score and other variables
+ * 
+ */
 class StateManager {
 	std::map<std::string, int> memory;
 	public:

@@ -13,11 +13,12 @@ enum LEVELID
 	TITLE
 };
 
+/**
+ * @brief Loads all game elements
+ * 
+ */
 class Level
 {
-	/**
-	 *  Loads all game elements
-	 **/
 public:
 	function<void(Level *)> callback;
 	// void* callback;

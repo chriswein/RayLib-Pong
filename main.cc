@@ -31,7 +31,6 @@ shared_ptr<StateManager> state(nullptr);
  */
 void changeLevelRequest(Level *level)
 {
-    std::cout << "Change of Level requested" << std::endl;
     // Clean up previous level
     free((void *)current_level);
     // Hook up the new one and init
@@ -43,7 +42,6 @@ std::function<void(Level *)> cb = &changeLevelRequest;
 void init()
 {
 
-// current_level = make_shared<Game>(Game(cb));
 #ifndef NOTITLE
     current_level = new Title(cb, am, state); // new Game(cb);
 #endif
@@ -96,7 +94,7 @@ int main(void)
     SetExitKey(KEY_BACKSPACE);
     init();
     HideCursor();
-#ifdef PLATFORM_WEB
+#ifdef PLATFORM_WEB // Emscripten does not work well with busy waiting
     emscripten_set_main_loop(emsloop, 0, 1);
 #else
     SetTargetFPS(60);

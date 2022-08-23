@@ -26,7 +26,6 @@ void Game::init()
 	this->top = std::make_shared<Wall>(Wall(TOPWALL, {0, -10, WIDTH, 10}));
 	this->bottom = std::make_shared<Wall>(Wall(BOTTOMWALL, {0, HEIGHT, WIDTH, 10}));
 	this->ball1 = std::make_shared<ball>(ball({WIDTH / 2, 360, 10, 10}, {18, 1}, this->am, this->state));
-	std::cout << "init game elements done" << std::endl;
 	game_elements->push_back(std::dynamic_pointer_cast<drawable>(paddle1));
 	game_elements->push_back(std::dynamic_pointer_cast<drawable>(paddle2));
 	game_elements->push_back(std::dynamic_pointer_cast<drawable>(top));
@@ -108,10 +107,6 @@ void Game::update()
 		// Is the ball still in the game?
 		if (!this->ball1->living)
 		{
-			std::cout << "Game over" << std::endl;
-			std::cout << "Winner was:" << std::endl;
-			std::cout << this->ball1->lastCollisionPaddle << std::endl;
-
 			this->init();
 		}
 	}
