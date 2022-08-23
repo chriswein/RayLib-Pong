@@ -1,4 +1,6 @@
 #include "level.h"
+#include "game_elements.h"
+#include "engine.h"
 
 class Game : public Level
 {
