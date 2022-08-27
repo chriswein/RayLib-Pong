@@ -14,45 +14,71 @@
 
 /**
  * @brief Main class enabling the game loop to draw and update an element
- * 
+ *
  */
 class drawable
 {
 public:
-    virtual void draw();
-    virtual void update();
+#ifdef PLATFORM_WEB
+	virtual void draw(){};
+	virtual void update(){};
+
+#else
+	virtual void draw();
+	virtual void update();
+
+#endif
 };
 
-typedef struct {
+typedef struct
+{
 	bool moving;
 	int direction;
 	float speed;
-}MovementInfo;
+} MovementInfo;
 
 /**
  * @brief Game elements need to implement this if they need collision detection
- * 
+ *
  */
-class boxcollision{
-	public: 
+class boxcollision
+{
+public:
+#ifdef PLATFORM_WEB
+
+	virtual Rectangle get(){};
+	virtual bool check(std::shared_ptr<boxcollision> partner){};
+	virtual void collision(std::shared_ptr<boxcollision> partner){};
+	virtual int id(){};
+	virtual MovementInfo moveStatus(){};
+#else
 	virtual Rectangle get();
 	virtual bool check(std::shared_ptr<boxcollision> partner);
 	virtual void collision(std::shared_ptr<boxcollision> partner);
 	virtual int id();
 	virtual MovementInfo moveStatus();
+
+#endif
 };
 
-class keylistener{
+class keylistener
+{
+#ifdef PLATFORM_WEB
+	virtual void keyEvent(int event, int key){};
+#else
 	virtual void keyEvent(int event, int key);
+#endif
 };
 
 /**
  * @brief Used to keep track of the game score and other variables
- * 
+ *
  */
-class StateManager {
+class StateManager
+{
 	std::map<std::string, int> memory;
-	public:
+
+public:
 	void increaseValue(std::string value);
 	int getValue(std::string key);
 	void setValue(std::string key, int value);
