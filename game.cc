@@ -1,4 +1,7 @@
 #include "game.h"
+#include <stdlib.h>
+#include <limits.h>
+#include <iostream>
 
 void Game::drawPoints()
 {
@@ -25,7 +28,14 @@ void Game::init()
 	this->paddle2 = std::make_shared<paddle>(paddle(PADDLE2, {WIDTH - 20, 260, 20, 200}));
 	this->top = std::make_shared<Wall>(Wall(TOPWALL, {0, -10, WIDTH, 10}));
 	this->bottom = std::make_shared<Wall>(Wall(BOTTOMWALL, {0, HEIGHT, WIDTH, 10}));
-	this->ball1 = std::make_shared<ball>(ball({WIDTH / 2, 360, 10, 10}, {18, 1}, this->am, this->state));
+	
+	// Gen Random direction
+	float sign = static_cast<float>(std::rand()) / RAND_MAX;
+	float sign2 = static_cast<float>(std::rand()) / RAND_MAX;
+	(sign < 0.5)? sign=-1:sign=1;
+	(sign2 < 0.5)? sign2=-1:sign2=1;
+	this->ball1 = std::make_shared<ball>(ball({WIDTH / 2, 360, 10, 10}, {sign*18, sign2*1}, this->am, this->state));
+
 	game_elements->push_back(std::dynamic_pointer_cast<drawable>(paddle1));
 	game_elements->push_back(std::dynamic_pointer_cast<drawable>(paddle2));
 	game_elements->push_back(std::dynamic_pointer_cast<drawable>(top));

@@ -7,7 +7,6 @@ paddle::paddle(int id, Rectangle vec)
 }
 paddle::~paddle()
 {
-	std::cout << "deconstructed paddle: " << this->id_ << std::endl;
 }
 void paddle::draw()
 {
@@ -86,7 +85,7 @@ void ball::draw()
 }
 ball::~ball()
 {
-	std::cout << "decontructed ball" << std::endl;
+	
 }
 Vector2 ball::middle()
 {

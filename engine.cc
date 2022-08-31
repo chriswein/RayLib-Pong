@@ -18,5 +18,4 @@ void StateManager::setValue(std::string key, int value)
 void StateManager::increaseValue(std::string key)
 {
 	this->memory[key] += 1;
-	std::cout << "increased value " << key << " to " << this->memory[key] << std::endl;
 }

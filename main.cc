@@ -48,7 +48,6 @@ void init()
 #ifdef NOTITLE
     current_level = new Game(cb, am, state);
 #endif
-    prnt("initialized");
     current_level->init();
 }
 
