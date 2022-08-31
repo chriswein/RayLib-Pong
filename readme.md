@@ -23,4 +23,5 @@ g++ main.cc engine.cc level.cc audio.cc game.cc game_elements.cc -o ./build/main
 
 ## WASM
 
-I plan to compile the game to WASM in the future to enable in browser gameplay.
+You can play a WASM Version in your Browser here:
+[ https://chriswein.github.io/game.html](https://chriswein.github.io/game.html).
